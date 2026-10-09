@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#167a52"><title>Sanju Daily Needs</title>
+<style>
+:root{--g:#167a52;--p:#eaf6ef;--ink:#18332a;--mut:#66756e;--line:#dfe8e2;--bg:#f5f8f6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}header{background:var(--g);color:#fff;padding:20px 16px}header h1{margin:0;font-size:23px}header p{margin:4px 0 0;font-size:13px}.wrap{max-width:900px;margin:auto;padding:14px}.notice{padding:12px;border-radius:12px;background:#fff6d9;border:1px solid #efdfa4;font-size:13px;margin-bottom:12px}.tabs{display:flex;gap:7px;position:sticky;top:0;background:var(--bg);padding:5px 0;z-index:3}.tabs button,.btn{border:0;border-radius:10px;padding:11px 13px;font-weight:700;cursor:pointer}.tabs button{flex:1;background:#e6ece8;color:var(--ink)}.tabs .on,.btn{background:var(--g);color:white}.btn.alt{background:#e6ece8;color:var(--ink)}h2{font-size:19px;margin:16px 0 10px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card,.panel,.order{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px}.emoji{font-size:28px}.card h3{font-size:15px;margin:5px 0}.muted,.small{color:var(--mut);font-size:12px}.price{font-weight:800;margin:7px 0}.card button{width:100%}.row{display:flex;align-items:center;justify-content:space-between;gap:8px}.field{display:block;font-size:13px;font-weight:650;margin:10px 0}.field input,.field textarea,.field select{display:block;width:100%;padding:11px;border:1px solid #cbd8d0;border-radius:9px;margin-top:5px;font:inherit;background:white}.field textarea{min-height:70px}.hidden{display:none!important}.cartline{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}.qty button{background:white;border:1px solid var(--line);border-radius:7px;padding:3px 9px}.status{background:var(--p);color:var(--g);border-radius:20px;padding:4px 8px;font-size:12px}.order{margin:10px 0}.empty{text-align:center;color:var(--mut);padding:24px}.pill{display:inline-block;background:var(--p);color:var(--g);border-radius:20px;padding:4px 8px;font-size:11px}
+@media(min-width:650px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.wrap{padding:20px}}
+</style></head>
+<body>
+<header><h1>🛒 Sanju Daily Needs</h1><p>Roz ka samaan, aapke ghar tak</p></header>
+<main class="wrap">
+<div class="notice"><b>Order-based service:</b> Hum order ke baad dukaan se samaan kharidte hain. Final price aur availability WhatsApp par confirm hogi. Abhi demo prices dikhaye gaye hain.</div>
+<nav class="tabs"><button id="tbShop" class="on" onclick="tab('shop')">🛍️ Samaan</button><button id="tbCart" onclick="tab('cart')">🛒 Cart <span id="count">0</span></button><button id="tbAdmin" onclick="tab('admin')">⚙️ Admin</button></nav>
+<section id="shop"><div class="row"><h2>Grocery catalogue</h2><span class="pill">Demo prices</span></div><input id="search" class="field" style="width:100%;padding:11px;border:1px solid #cbd8d0;border-radius:9px" placeholder="Samaan search karein..." oninput="renderProducts()"><div id="products" class="grid"></div></section>
+<section id="cart" class="hidden"><h2>Aapka Cart</h2><div id="cartItems" class="panel"></div>
+<form id="checkout" class="panel" style="margin-top:12px"><h2 style="margin-top:0">Delivery details</h2>
+<label class="field">Naam *<input id="name" required autocomplete="name" placeholder="Aapka naam"></label>
+<label class="field">Mobile number *<input id="phone" required inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="10 digit number"></label>
+<label class="field">Poora delivery address *<textarea id="address" required autocomplete="street-address" placeholder="Ghar number, society, area"></textarea></label>
+<label class="field">Extra note (optional)<textarea id="note" placeholder="Brand preference ya koi khaas baat"></textarea></label>
+<div class="row"><b>Estimated total</b><b id="total">₹0</b></div><p class="small">Yeh estimated amount hai. Dukaan ka actual bill aur delivery charge WhatsApp par confirm hoga.</p>
+<button class="btn" style="width:100%" type="submit">WhatsApp par order bhejein</button></form></section>
+<section id="admin" class="hidden"><h2>Admin settings</h2><div class="panel">
+<p class="small">Apna WhatsApp number country code ke saath daalein. India ke liye 91 + 10 digit number, bina + ya spaces. Yeh number isi device ke browser mein save hoga.</p>
+<label class="field">Business WhatsApp number<input id="waNumber" inputmode="numeric" placeholder="919876543210"></label>
+<button class="btn" onclick="saveSettings()">Number save karein</button>
+<p id="settingsMsg" class="small"></p><hr style="border:0;border-top:1px solid var(--line)">
+<h2>Local demo orders</h2><p class="small">Sirf is browser/device par locally place kiye gaye orders yahan dikhte hain. WhatsApp order message bhejne par customer ka message aapke WhatsApp chat mein aayega, lekin yeh automatic shared online admin database nahi hai.</p>
+<div id="orders"></div><button class="btn alt" onclick="exportOrders()">Orders CSV download</button>
+</div></section>
+</main>
+<script>
+const products=[
+[1,"Aata 1 kg",45,"🌾","Atta & grains"],[2,"Chawal 1 kg",60,"🍚","Atta & grains"],[3,"Toor Dal 500 g",65,"🫘","Dal & pulses"],[4,"Moong Dal 500 g",55,"🫘","Dal & pulses"],
+[5,"Cooking Oil 1 L",135,"🫗","Oil & spices"],[6,"Cheeni 1 kg",45,"🧂","Daily essentials"],[7,"Namak 1 kg",20,"🧂","Oil & spices"],[8,"Chai Patti 250 g",90,"🍵","Tea & snacks"],
+[9,"Bath Soap",35,"🧼","Personal care"],[10,"Detergent 500 g",55,"🫧","Cleaning"],[11,"Toothpaste",55,"🪥","Personal care"],[12,"Biscuits Pack",20,"🍪","Tea & snacks"],
+[13,"Poha 500 g",35,"🥣","Breakfast"],[14,"Besan 500 g",45,"🟡","Atta & grains"],[15,"Doodh 500 ml",32,"🥛","Dairy"],[16,"Bread",35,"🍞","Dairy"],
+[17,"Dishwash Bar",20,"🧽","Cleaning"],[18,"Shampoo Sachet Pack",10,"🧴","Personal care"],[19,"Masala Pack",25,"🌶️","Oil & spices"],[20,"Water Bottle 1 L",20,"💧","Drinks"]
+].map(x=>({id:x[0],name:x[1],price:x[2],emoji:x[3],category:x[4]}));
+let cart=JSON.parse(localStorage.getItem("snd2_cart")||"{}"),orders=JSON.parse(localStorage.getItem("snd2_orders")||"[]"),wa=localStorage.getItem("snd2_wa")||"";
+const money=n=>"₹"+Math.round(n);
+function save(){localStorage.setItem("snd2_cart",JSON.stringify(cart));localStorage.setItem("snd2_orders",JSON.stringify(orders))}
+function renderProducts(){let q=(document.getElementById("search")?.value||"").toLowerCase();document.getElementById("products").innerHTML=products.filter(p=>(p.name+" "+p.category).toLowerCase().includes(q)).map(p=>`<article class="card"><div class="emoji">${p.emoji}</div><h3>${p.name}</h3><div class="muted">${p.category}</div><div class="price">${money(p.price)}</div><button class="btn" onclick="add(${p.id})">+ Cart mein daalein</button></article>`).join("")||'<div class="empty">Koi product nahi mila.</div>'}
+function add(id){cart[id]=(cart[id]||0)+1;save();renderCart();count();}function change(id,d){cart[id]=(cart[id]||0)+d;if(cart[id]<=0)delete cart[id];save();renderCart();count()}
+function items(){return Object.entries(cart).map(([id,q])=>({p:products.find(p=>p.id===+id),q})).filter(x=>x.p)}function sum(){return items().reduce((s,x)=>s+x.p.price*x.q,0)}
+function count(){document.getElementById("count").textContent=Object.values(cart).reduce((a,b)=>a+b,0)}
+function renderCart(){let a=items();document.getElementById("cartItems").innerHTML=a.length?a.map(x=>`<div class="cartline"><div><b>${x.p.name}</b><div class="small">${money(x.p.price)} × ${x.q}</div></div><div class="qty"><button type="button" onclick="change(${x.p.id},-1)">−</button> ${x.q} <button type="button" onclick="change(${x.p.id},1)">+</button></div></div>`).join("")+`<div class="row" style="padding-top:12px"><b>Estimated total</b><b>${money(sum())}</b></div>`:'<div class="empty">Cart khaali hai. Pehle samaan add karein.</div>';document.getElementById("total").textContent=money(sum())}
+function tab(t){["shop","cart","admin"].forEach(k=>{document.getElementById(k).classList.toggle("hidden",k!==t);document.getElementById("tb"+k[0].toUpperCase()+k.slice(1)).classList.toggle("on",k===t)});if(t==="admin"){document.getElementById("waNumber").value=wa;renderOrders()}if(t==="cart")renderCart();window.scrollTo({top:0,behavior:"smooth"})}
+function saveSettings(){wa=document.getElementById("waNumber").value.replace(/\D/g,"");localStorage.setItem("snd2_wa",wa);document.getElementById("settingsMsg").textContent="WhatsApp number save ho gaya. Number sahi check kar lein."}
+document.getElementById("checkout").addEventListener("submit",e=>{e.preventDefault();let a=items();if(!a.length){alert("Pehle cart mein samaan add karein.");return}if(!wa){alert("Pehle Admin tab mein apna WhatsApp number save karein.");tab("admin");return}
+let order={id:"SND"+Date.now().toString().slice(-7),date:new Date().toLocaleString("en-IN"),name:document.getElementById("name").value.trim(),phone:document.getElementById("phone").value.trim(),address:document.getElementById("address").value.trim(),note:document.getElementById("note").value.trim(),items:a.map(x=>({name:x.p.name,qty:x.q,estimate:x.p.price})),total:sum(),status:"WhatsApp order requested"};
+orders.unshift(order);save();renderOrders();let lines=order.items.map(x=>`• ${x.name} × ${x.qty} (demo estimate ₹${x.estimate*x.qty})`).join("\n");let msg=`Namaste Sanju Daily Needs! Mera grocery order:\nOrder ID: ${order.id}\nNaam: ${order.name}\nMobile: ${order.phone}\nAddress: ${order.address}\nSamaan:\n${lines}\nEstimated total: ₹${order.total}\nNote: ${order.note||"Nahi"}\nKripya availability, actual price aur delivery charge confirm karein.`;cart={};save();renderCart();count();window.open("https://wa.me/"+wa+"?text="+encodeURIComponent(msg),"_blank");alert("WhatsApp khulega. Wahan Send dabana zaroori hai.");tab("shop")});
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function renderOrders(){let el=document.getElementById("orders");if(!orders.length){el.innerHTML='<div class="empty">Is browser par abhi local demo order nahi hai.</div>';return}el.innerHTML=orders.map(o=>`<article class="order"><div class="row"><b>${o.id}</b><span class="status">${esc(o.status)}</span></div><p><b>${esc(o.name)}</b> · ${esc(o.phone)}<br><span class="small">${esc(o.date)}</span></p><p>${esc(o.address)}</p><p>${o.items.map(i=>esc(i.name)+" × "+i.qty).join("<br>")}</p><b>Estimated: ${money(o.total)}</b></article>`).join("")}
+function exportOrders(){if(!orders.length){alert("Koi local order nahi hai.");return}let rows=[["Order ID","Date","Name","Phone","Address","Items","Estimated total","Status"],...orders.map(o=>[o.id,o.date,o.name,o.phone,o.address,o.items.map(i=>i.name+" x"+i.qty).join("; "),o.total,o.status])];let csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}));a.download="sanju-orders.csv";a.click();URL.revokeObjectURL(a.href)}
+renderProducts();renderCart();count();renderOrders();
+</script></body></html>
